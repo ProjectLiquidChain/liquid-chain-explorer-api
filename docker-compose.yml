@@ -1,0 +1,16 @@
+version: "3"
+services:
+  surf:
+    volumes:
+      - ./data:/root/surf/storage
+    ports:
+      - 5556:5556
+    build: .
+    environment:
+      DATABASE_URL: postgresql://surf:secret@db/surf
+      NODE_URL: https://test-3.liquidchain.network
+  db:
+    environment:
+      POSTGRES_USER: surf
+      POSTGRES_PASSWORD: secret
+    image: postgres:9.6-alpine
