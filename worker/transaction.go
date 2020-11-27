@@ -28,14 +28,14 @@ func (worker Worker) processTransaction(tx node.Transaction) error {
 	sender := database.Account{Address: tx.Sender}
 	if err := worker.db.
 		Where(database.Account{Address: tx.Sender}).
-		FirstOrInit(&sender).Error; err != nil {
+		FirstOrCreate(&sender).Error; err != nil {
 		return err
 	}
 
 	receiver := database.Account{Address: tx.Receiver}
 	if err := worker.db.
 		Where(database.Account{Address: tx.Receiver}).
-		FirstOrInit(&receiver).Error; err != nil {
+		FirstOrCreate(&receiver).Error; err != nil {
 		return err
 	}
 

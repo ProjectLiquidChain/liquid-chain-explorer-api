@@ -6,10 +6,15 @@ services:
     ports:
       - 5556:5556
     build: .
+    depends_on:
+      - db
     environment:
+      STORAGE_PATH: /root/surf/storage
       DATABASE_URL: postgresql://surf:secret@db/surf
-      NODE_URL: https://test-3.liquidchain.network
+      NODE_URL: http://test-1.liquidchain.network:5555
   db:
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_USER: surf
       POSTGRES_PASSWORD: secret

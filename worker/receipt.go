@@ -7,6 +7,7 @@ import (
 
 	"github.com/QuoineFinancial/liquid-chain-explorer-api/database"
 	"github.com/QuoineFinancial/liquid-chain-explorer-api/node"
+	"github.com/pkg/errors"
 )
 
 const transferEvent = "Transfer"
@@ -37,9 +38,32 @@ func (worker Worker) storeReceipt(receipt node.Receipt) {
 		panic(err)
 	}
 
-	if err := worker.txStorage.Update(hashByte, receiptByte); err != nil {
+	if err := worker.receiptStorage.Update(hashByte, receiptByte); err != nil {
 		panic(err)
 	}
+}
+
+func (worker Worker) updateAsset(account database.Account, token database.Token) error {
+	var asset database.Asset
+	worker.db.Where(database.Asset{
+		AccountID: account.ID,
+		TokenID:   token.ID,
+	}).FirstOrCreate(&asset)
+
+	result, err := worker.nodeAPI.Call("get_balance", token.Address, []string{account.Address})
+	if err != nil {
+		return err
+	}
+
+	if result.Code == 0 {
+		if err := worker.db.Model(&asset).Update("balance", result.Result).Error; err != nil {
+			return err
+		}
+	} else {
+		return errors.Errorf("Unable to get balance of token %s for address %s", token.Currency, account.Address)
+	}
+
+	return nil
 }
 
 func (worker Worker) processReceipt(receipt node.Receipt) error {
@@ -56,7 +80,7 @@ func (worker Worker) processReceipt(receipt node.Receipt) error {
 
 			if err := worker.db.Where(database.Token{
 				Address: event.Contract,
-			}).First(&token); err != nil {
+			}).First(&token).Error; err != nil {
 				log.Printf("Unsupported Transfer event for contract %s\n", event.Contract)
 				continue
 			}
@@ -89,6 +113,9 @@ func (worker Worker) processReceipt(receipt node.Receipt) error {
 				TransactionID: tx.ID,
 				EventIndex:    index,
 			}).FirstOrCreate(&transfer)
+
+			worker.updateAsset(from, token)
+			worker.updateAsset(to, token)
 		}
 	}
 

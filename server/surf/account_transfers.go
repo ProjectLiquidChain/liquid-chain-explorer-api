@@ -29,8 +29,9 @@ func (service Service) GetAccountTransfers(r *http.Request, params *GetAccountTr
 		Joins("FromAccount").
 		Joins("ToAccount").
 		Joins("Token").
+		Order("transfers.id DESC").
 		Where(database.Transfer{FromAccountID: account.ID}).
-		Or(database.Transfer{ToAccountID: account.ID}).Error; err != nil {
+		Or(database.Transfer{ToAccountID: account.ID}).Find(&transfers).Error; err != nil {
 		return err
 	}
 

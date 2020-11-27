@@ -17,12 +17,42 @@ func New(url string) API {
 // GetBlock returns block with given height
 func (api API) GetBlock(height uint64) (Block, error) {
 	var response struct {
-		Block Block `json:"block"`
+		Result struct {
+			Block Block `json:"block"`
+		} `json:"result"`
 	}
-	if err := api.Request("chain.GetBlock", struct {
+	if err := api.Request("chain.GetBlockByHeight", struct {
 		Height uint64 `json:"height"`
 	}{height}, &response); err != nil {
 		return Block{}, err
 	}
-	return response.Block, nil
+	return response.Result.Block, nil
+}
+
+// GetLatestBlock returns block with given height
+func (api API) GetLatestBlock() (Block, error) {
+	var response struct {
+		Result struct {
+			Block Block `json:"block"`
+		} `json:"result"`
+	}
+	if err := api.Request("chain.GetLatestBlock", struct{}{}, &response); err != nil {
+		return Block{}, err
+	}
+	return response.Result.Block, nil
+}
+
+// Call emit call
+func (api API) Call(method, address string, args []string) (Receipt, error) {
+	var response struct {
+		Result Receipt `json:"result"`
+	}
+	if err := api.Request("chain.Call", struct {
+		Method  string   `json:"method"`
+		Address string   `json:"address"`
+		Args    []string `json:"args"`
+	}{method, address, args}, &response); err != nil {
+		return Receipt{}, err
+	}
+	return response.Result, nil
 }

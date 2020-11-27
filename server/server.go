@@ -1,10 +1,11 @@
-package api
+package server
 
 import (
 	"log"
 	"net/http"
 
 	"github.com/QuoineFinancial/liquid-chain-explorer-api/server/surf"
+	"github.com/QuoineFinancial/liquid-chain-explorer-api/storage"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/rpc/v2"
 	"github.com/gorilla/rpc/v2/json2"
@@ -20,12 +21,12 @@ type Server struct {
 }
 
 // New return an new instance of Server
-func New(url, dbURL, nodeURL, storagePath string) Server {
+func New(url, dbURL, nodeURL string, txStorage, blockStorage, receiptStorage storage.Storage) Server {
 	api := Server{
 		url: url,
 	}
 	api.setupServer()
-	api.registerServices(dbURL, nodeURL, storagePath)
+	api.registerServices(dbURL, nodeURL, txStorage, blockStorage, receiptStorage)
 	api.setupRouter()
 	return api
 }
@@ -49,11 +50,11 @@ func (api *Server) setupRouter() {
 	}
 }
 
-func (api *Server) registerServices(dbURL, nodeURL, storagePath string) {
+func (api *Server) registerServices(dbURL, nodeURL string, txStorage, blockStorage, receiptStorage storage.Storage) {
 	if api.rpcServer == nil {
 		panic("api.registerServices call without api.server")
 	}
-	if err := api.rpcServer.RegisterService(surf.New(dbURL, nodeURL, storagePath), "surf"); err != nil {
+	if err := api.rpcServer.RegisterService(surf.New(dbURL, nodeURL, txStorage, blockStorage, receiptStorage), "surf"); err != nil {
 		panic(err)
 	}
 }

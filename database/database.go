@@ -28,5 +28,7 @@ func New(url string) Database {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return Database{postgresDB}
+	db := Database{postgresDB}
+	db.migrate()
+	return db
 }
