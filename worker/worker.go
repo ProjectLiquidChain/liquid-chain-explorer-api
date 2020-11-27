@@ -1,6 +1,8 @@
 package worker
 
 import (
+	"time"
+
 	"github.com/QuoineFinancial/liquid-chain-explorer-api/database"
 	"github.com/QuoineFinancial/liquid-chain-explorer-api/node"
 	"github.com/QuoineFinancial/liquid-chain-explorer-api/storage"
@@ -29,24 +31,28 @@ func New(dbURL, nodeURL string, txStorage, blockStorage, receiptStorage storage.
 
 // Start runs the monitor
 func (worker Worker) Start() {
-	latestBlock, err := worker.nodeAPI.GetLatestBlock()
-	if err != nil {
-		panic(err)
-	}
-
-	var block database.Block
-	if err := worker.db.Order("height DESC").Limit(1).First(&block).Error; err != nil {
-		if err != gorm.ErrRecordNotFound {
-			panic(err)
-		}
-	}
-
-	for i := uint64(block.Height + 1); i < latestBlock.Height; i++ {
-		block, err := worker.nodeAPI.GetBlock(i)
+	for {
+		latestBlock, err := worker.nodeAPI.GetLatestBlock()
 		if err != nil {
 			panic(err)
 		}
 
-		worker.processBlock(block)
+		var block database.Block
+		if err := worker.db.Order("height DESC").Limit(1).First(&block).Error; err != nil {
+			if err != gorm.ErrRecordNotFound {
+				panic(err)
+			}
+		}
+
+		for i := uint64(block.Height + 1); i < latestBlock.Height; i++ {
+			block, err := worker.nodeAPI.GetBlock(i)
+			if err != nil {
+				panic(err)
+			}
+
+			worker.processBlock(block)
+		}
+
+		time.Sleep(2 * time.Second)
 	}
 }
