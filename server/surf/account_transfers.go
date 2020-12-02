@@ -30,6 +30,7 @@ func (service Service) GetAccountTransfers(r *http.Request, params *GetAccountTr
 		Joins("ToAccount").
 		Joins("Token").
 		Order("transfers.id DESC").
+		Limit(100).
 		Where(database.Transfer{FromAccountID: account.ID}).
 		Or(database.Transfer{ToAccountID: account.ID}).Find(&transfers).Error; err != nil {
 		return err

@@ -29,7 +29,7 @@ func (service Service) GetAccountTxs(r *http.Request, params *GetAccountTxsParam
 
 	var txs []database.Transaction
 	if err := service.db.
-		Order("transactions.id DESC").
+		Order("transactions.id DESC").Limit(100).
 		Where(database.Transaction{SenderID: account.ID}).
 		Or(database.Transaction{ReceiverID: account.ID}).Find(&txs).Error; err != nil {
 		return err
