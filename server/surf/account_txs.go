@@ -3,6 +3,7 @@ package surf
 import (
 	"encoding/hex"
 	"encoding/json"
+	"math"
 	"net/http"
 
 	"github.com/QuoineFinancial/liquid-chain-explorer-api/database"
@@ -11,11 +12,13 @@ import (
 
 // GetAccountTxsParams is params to GetAccount transaction
 type GetAccountTxsParams struct {
+	paginationParams
 	Address string `json:"address"`
 }
 
 // GetAccountTxsResult is result of GetAccount
 type GetAccountTxsResult struct {
+	paginationResult
 	Transactions []node.Transaction `json:"transactions"`
 	Receipts     []node.Receipt     `json:"receipts"`
 }
@@ -27,11 +30,21 @@ func (service Service) GetAccountTxs(r *http.Request, params *GetAccountTxsParam
 		return err
 	}
 
-	var txs []database.Transaction
-	if err := service.db.
-		Order("transactions.id DESC").Limit(100).
+	limit := params.Limit
+	if limit == 0 {
+		limit = defaultLimit
+	}
+
+	query := service.db.
 		Where(database.Transaction{SenderID: account.ID}).
-		Or(database.Transaction{ReceiverID: account.ID}).Find(&txs).Error; err != nil {
+		Or(database.Transaction{ReceiverID: account.ID}).
+		Order("transactions.id DESC")
+
+	var txs []database.Transaction
+	if err := query.
+		Offset(params.Offset).
+		Limit(limit).
+		Find(&txs).Error; err != nil {
 		return err
 	}
 
@@ -73,5 +86,12 @@ func (service Service) GetAccountTxs(r *http.Request, params *GetAccountTxsParam
 
 	result.Transactions = nodeTxs
 	result.Receipts = receipts
+
+	var count int64
+	if err := query.Count(&count).Error; err != nil {
+		return err
+	}
+	result.TotalPage = int(math.Ceil(float64(count) / float64(limit)))
+
 	return nil
 }
