@@ -42,7 +42,7 @@ func (service Service) GetAccountTxs(r *http.Request, params *GetAccountTxsParam
 
 	var txs []database.Transaction
 	if err := query.
-		Offset(params.Offset).
+		Offset(limit * params.Page).
 		Limit(limit).
 		Find(&txs).Error; err != nil {
 		return err

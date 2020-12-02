@@ -43,7 +43,7 @@ func (service Service) GetAccountTransfers(r *http.Request, params *GetAccountTr
 	var transfers []database.Transfer
 	if err := query.
 		Limit(limit).
-		Offset(params.Offset).
+		Offset(limit * params.Page).
 		Find(&transfers).Error; err != nil {
 		return err
 	}
