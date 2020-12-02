@@ -87,6 +87,7 @@ func (service Service) GetAccountTxs(r *http.Request, params *GetAccountTxsParam
 
 	var count int64
 	if err := service.db.
+		Model(&database.Transaction{}).
 		Where(database.Transaction{SenderID: account.ID}).
 		Or(database.Transaction{ReceiverID: account.ID}).
 		Count(&count).Error; err != nil {

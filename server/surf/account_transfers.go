@@ -49,6 +49,7 @@ func (service Service) GetAccountTransfers(r *http.Request, params *GetAccountTr
 
 	var count int64
 	if err := service.db.
+		Model(&database.Transfer{}).
 		Joins("ToAccount").
 		Joins("FromAccount").
 		Where(database.Transfer{FromAccountID: account.ID}).
