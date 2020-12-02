@@ -35,13 +35,11 @@ func (service Service) GetAccountTxs(r *http.Request, params *GetAccountTxsParam
 		limit = defaultLimit
 	}
 
-	query := service.db.
+	var txs []database.Transaction
+	if err := service.db.
 		Where(database.Transaction{SenderID: account.ID}).
 		Or(database.Transaction{ReceiverID: account.ID}).
-		Order("transactions.id DESC")
-
-	var txs []database.Transaction
-	if err := query.
+		Order("transactions.id DESC").
 		Offset(limit * params.Page).
 		Limit(limit).
 		Find(&txs).Error; err != nil {
@@ -88,10 +86,13 @@ func (service Service) GetAccountTxs(r *http.Request, params *GetAccountTxsParam
 	result.Receipts = receipts
 
 	var count int64
-	if err := query.Count(&count).Error; err != nil {
+	if err := service.db.
+		Where(database.Transaction{SenderID: account.ID}).
+		Or(database.Transaction{ReceiverID: account.ID}).
+		Count(&count).Error; err != nil {
 		return err
 	}
-	result.TotalPage = int(math.Ceil(float64(count) / float64(limit)))
+	result.TotalPages = int(math.Ceil(float64(count) / float64(limit)))
 
 	return nil
 }

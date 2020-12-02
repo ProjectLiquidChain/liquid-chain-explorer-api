@@ -31,17 +31,15 @@ func (service Service) GetAccountTransfers(r *http.Request, params *GetAccountTr
 		limit = defaultLimit
 	}
 
-	query := service.db.
+	var transfers []database.Transfer
+	if err := service.db.
 		Joins("Token").
 		Joins("ToAccount").
 		Joins("FromAccount").
 		Joins("Transaction").
 		Order("transfers.id DESC").
 		Where(database.Transfer{FromAccountID: account.ID}).
-		Or(database.Transfer{ToAccountID: account.ID})
-
-	var transfers []database.Transfer
-	if err := query.
+		Or(database.Transfer{ToAccountID: account.ID}).
 		Limit(limit).
 		Offset(limit * params.Page).
 		Find(&transfers).Error; err != nil {
@@ -50,10 +48,15 @@ func (service Service) GetAccountTransfers(r *http.Request, params *GetAccountTr
 	result.Transfers = transfers
 
 	var count int64
-	if err := query.Count(&count).Error; err != nil {
+	if err := service.db.
+		Joins("ToAccount").
+		Joins("FromAccount").
+		Where(database.Transfer{FromAccountID: account.ID}).
+		Or(database.Transfer{ToAccountID: account.ID}).
+		Count(&count).Error; err != nil {
 		return err
 	}
-	result.TotalPage = int(math.Ceil(float64(count) / float64(limit)))
+	result.TotalPages = int(math.Ceil(float64(count) / float64(limit)))
 
 	return nil
 }

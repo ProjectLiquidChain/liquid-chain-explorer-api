@@ -8,5 +8,5 @@ type paginationParams struct {
 }
 
 type paginationResult struct {
-	TotalPage int `json:"totalPage"`
+	TotalPages int `json:"totalPages"`
 }
