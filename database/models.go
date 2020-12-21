@@ -20,7 +20,7 @@ type Asset struct {
 	AccountID uint    `gorm:"index" json:"-"`
 	Balance   string  `json:"balance"`
 	Token     Token   `gorm:"foreignKey:TokenID" json:"token"`
-	Account   Account `gorm:"foreignKey:AccountID" json:"account"`
+	Account   Account `gorm:"foreignKey:AccountID" json:"-"`
 }
 
 // Token represents a token of liquid-chain
