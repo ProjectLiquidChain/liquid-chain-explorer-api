@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/QuoineFinancial/liquid-chain-explorer-api/database"
-	"github.com/QuoineFinancial/liquid-chain-explorer-api/node"
 )
 
 // GetBlocksParams is params to GetAccount transaction
@@ -16,7 +15,7 @@ type GetBlocksParams struct {
 // GetBlocksResult is result of GetAccount
 type GetBlocksResult struct {
 	paginationResult
-	Blocks []node.Block `json:"blocks"`
+	Blocks []database.Block `json:"blocks"`
 }
 
 // GetBlocks lookup txs for an account
@@ -34,6 +33,7 @@ func (service Service) GetBlocks(r *http.Request, params *GetBlocksParams, resul
 		Find(&blocks).Error; err != nil {
 		return err
 	}
+	result.Blocks = blocks
 
 	var count int64
 	if err := service.db.

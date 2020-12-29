@@ -33,6 +33,7 @@ func (service Service) GetTokens(r *http.Request, params *GetTokensParams, resul
 		Find(&tokens).Error; err != nil {
 		return err
 	}
+	result.Tokens = tokens
 
 	var count int64
 	if err := service.db.
