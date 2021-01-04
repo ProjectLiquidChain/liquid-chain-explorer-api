@@ -1,10 +1,13 @@
 package surf
 
 import (
+	"encoding/hex"
+	"encoding/json"
 	"math"
 	"net/http"
 
 	"github.com/QuoineFinancial/liquid-chain-explorer-api/database"
+	"github.com/QuoineFinancial/liquid-chain-explorer-api/node"
 )
 
 // GetBlocksParams is params to GetAccount transaction
@@ -15,7 +18,7 @@ type GetBlocksParams struct {
 // GetBlocksResult is result of GetAccount
 type GetBlocksResult struct {
 	paginationResult
-	Blocks []database.Block `json:"blocks"`
+	Blocks []node.Block `json:"blocks"`
 }
 
 // GetBlocks lookup txs for an account
@@ -33,7 +36,26 @@ func (service Service) GetBlocks(r *http.Request, params *GetBlocksParams, resul
 		Find(&blocks).Error; err != nil {
 		return err
 	}
-	result.Blocks = blocks
+
+	var rawBlocks []node.Block
+	for _, block := range blocks {
+		key, err := hex.DecodeString(block.Hash)
+		if err != nil {
+			return err
+		}
+		rawBlockByte, err := service.blockStorage.Get(key)
+		if err != nil {
+			return err
+		}
+
+		var rawBlock node.Block
+		if err := json.Unmarshal(rawBlockByte, &rawBlock); err != nil {
+			return err
+		}
+
+		rawBlocks = append(rawBlocks, rawBlock)
+	}
+	result.Blocks = rawBlocks
 
 	var count int64
 	if err := service.db.

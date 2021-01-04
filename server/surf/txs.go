@@ -74,15 +74,15 @@ func (service Service) GetTxs(r *http.Request, params *GetTxsParams, result *Get
 		receipts = append(receipts, receipt)
 	}
 
-	result.Transactions = nodeTxs
-	result.Receipts = receipts
-
 	var count int64
 	if err := service.db.
 		Model(&database.Transaction{}).
 		Count(&count).Error; err != nil {
 		return err
 	}
+
+	result.Transactions = nodeTxs
+	result.Receipts = receipts
 	result.TotalPages = int(math.Ceil(float64(count) / float64(limit)))
 
 	return nil
