@@ -81,18 +81,19 @@ func (service Service) GetStatus(r *http.Request, params *GetStatusParams, resul
 	if err != nil {
 		return err
 	}
-	result.AverageBlockTime = duration
 
 	totalTxs, err := service.getTotalTxs()
 	if err != nil {
 		return err
 	}
-	result.TotalTransactions = totalTxs
 
 	price, err := service.getPrice()
 	if err != nil {
 		return err
 	}
+
+	result.AverageBlockTime = duration
+	result.TotalTransactions = totalTxs
 	result.Price = price
 
 	return nil

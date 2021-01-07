@@ -33,14 +33,14 @@ func (service Service) GetTokens(r *http.Request, params *GetTokensParams, resul
 		Find(&tokens).Error; err != nil {
 		return err
 	}
-	result.Tokens = tokens
-
 	var count int64
 	if err := service.db.
 		Model(&database.Token{}).
 		Count(&count).Error; err != nil {
 		return err
 	}
+
+	result.Tokens = tokens
 	result.TotalPages = int(math.Ceil(float64(count) / float64(limit)))
 
 	return nil

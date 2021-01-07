@@ -37,7 +37,6 @@ func (service Service) GetTransfers(r *http.Request, params *GetTransfersParams,
 		Find(&transfers).Error; err != nil {
 		return err
 	}
-	result.Transfers = transfers
 
 	var count int64
 	if err := service.db.
@@ -47,6 +46,8 @@ func (service Service) GetTransfers(r *http.Request, params *GetTransfersParams,
 		Count(&count).Error; err != nil {
 		return err
 	}
+
+	result.Transfers = transfers
 	result.TotalPages = int(math.Ceil(float64(count) / float64(limit)))
 
 	return nil

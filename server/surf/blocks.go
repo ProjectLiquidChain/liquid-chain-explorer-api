@@ -55,7 +55,6 @@ func (service Service) GetBlocks(r *http.Request, params *GetBlocksParams, resul
 
 		rawBlocks = append(rawBlocks, rawBlock)
 	}
-	result.Blocks = rawBlocks
 
 	var count int64
 	if err := service.db.
@@ -63,6 +62,8 @@ func (service Service) GetBlocks(r *http.Request, params *GetBlocksParams, resul
 		Count(&count).Error; err != nil {
 		return err
 	}
+
+	result.Blocks = rawBlocks
 	result.TotalPages = int(math.Ceil(float64(count) / float64(limit)))
 
 	return nil
