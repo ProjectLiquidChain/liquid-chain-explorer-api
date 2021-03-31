@@ -1,6 +1,7 @@
 package surf
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -9,13 +10,12 @@ import (
 
 // GetTxsCountParams is params to GetAccount transaction
 type GetTxsCountParams struct {
-	Range time.Duration `json:"range"`
-	Size  int           `json:"count"`
+	Range string `json:"range"`
+	Size  int    `json:"size"`
 }
 
 // GetTxsCountResult is result of GetAccount
 type GetTxsCountResult struct {
-	paginationResult
 	Counts []int `json:"counts"`
 }
 
@@ -23,13 +23,19 @@ type GetTxsCountResult struct {
 func (service Service) GetTxsCount(r *http.Request, params *GetTxsCountParams, result *GetTxsCountResult) error {
 	toTime := time.Now()
 	counts := make([]int, params.Size)
+	duration, err := time.ParseDuration(params.Range)
+	if err != nil {
+		return err
+	}
+	fmt.Println(params)
 	for i := 0; i < params.Size; i++ {
-		fromTime := toTime.Add(-params.Range)
+		fromTime := toTime.Add(-duration)
+		fmt.Println(fromTime)
 		var count int64
 		if err := service.db.Model(&database.Transaction{}).
-			Joins("Block").
-			Where("Block.time > ?", fromTime).
-			Where("Block.time <= ?", toTime).
+			Joins("JOIN blocks ON transactions.block = blocks.height").
+			Where("blocks.time > ?", fromTime.Unix()).
+			Where("blocks.time <= ?", toTime.Unix()).
 			Count(&count).Error; err != nil {
 			return err
 		}

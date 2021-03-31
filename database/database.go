@@ -21,7 +21,7 @@ func New(url string) Database {
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
 		logger.Config{
 			SlowThreshold: time.Second * 5,
-			LogLevel:      logger.Silent,
+			LogLevel:      logger.Warn,
 			Colorful:      true,
 		},
 	)})
