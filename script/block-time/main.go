@@ -15,7 +15,7 @@ func copyBlockTimeFromStorageToDatabase() error {
 	node := node.New(os.Getenv("NODE_URL"))
 
 	var blocks []database.Block
-	db.Model(&database.Block{}).Find(&blocks).Where("time IS NULL")
+	db.Model(&database.Block{}).Where("time IS NULL").Find(&blocks)
 	for _, block := range blocks {
 		nodeBlock, err := node.GetBlock(uint64(block.Height))
 		if err != nil {

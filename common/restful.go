@@ -43,7 +43,7 @@ func (api RestfulAPI) Request(method, path string, body, result interface{}) err
 	responseBody, _ := ioutil.ReadAll(httpResponse.Body)
 	if httpResponse.StatusCode > 202 {
 		log.Println(method, api.base+path, string(responseBody))
-		return errors.New("node error: " + string(responseBody))
+		return errors.New("api error: " + string(responseBody))
 	}
 
 	return json.Unmarshal([]byte(string(responseBody)), result)
