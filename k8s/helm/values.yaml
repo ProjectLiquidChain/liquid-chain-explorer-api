@@ -1,0 +1,26 @@
+replicas: 1
+name: surf
+resources: {}
+port: 5556
+imagePullSecret: regcred
+image:
+  repository: docker.pkg.github.com/quoinefinancial/liquid-chain-explorer-api/surf
+  pullPolicy: Always
+  tag: master
+nodeURL: https://sentry-1.testnet.liquidchain.network
+ingress:
+  host: surf.testnet.liquidchain.network
+  tls:
+    secret: surf-tls
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+storage:
+  className: csi
+  size: 100Gi
+db:
+  user: surf
+  host: surf-db-postgresql
+  name: surf
+databasePasswordSecret: surf-db-password

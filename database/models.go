@@ -2,8 +2,9 @@ package database
 
 // Block represents a block in liquid-chain
 type Block struct {
-	ID     uint `gorm:"primaryKey"`
-	Height uint `gorm:"index"`
+	ID     uint   `gorm:"primaryKey"`
+	Height uint   `gorm:"index"`
+	Time   uint64 `gorm:"index"`
 	Hash   string
 }
 

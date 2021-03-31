@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: surf-migrate-block-time
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: migrate
+          image: docker.pkg.github.com/quoinefinancial/liquid-chain-explorer-api/block-time-394408aaf5f5b7db34343e62b564cd36
+          imagePullPolicy: Always
+          env:
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: surf-db-password
+                  key: postgresql-password
+            - name: DATABASE_URL
+              value: "postgresql://surf:$(DATABASE_PASSWORD)@surf-db-postgresql/surf"
+            - name: NODE_URL
+              value: http://test-5-api
+      restartPolicy: Never
+  backoffLimit: 0

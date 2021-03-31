@@ -43,6 +43,7 @@ func (worker Worker) processBlock(block node.Block) {
 	worker.db.Create(&database.Block{
 		Height: uint(block.Height),
 		Hash:   block.Hash,
+		Time:   block.Time,
 	})
 
 	worker.storeBlock(block)

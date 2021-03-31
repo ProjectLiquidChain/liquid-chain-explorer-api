@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+  labels:
+    name: {{ .Values.name }}
+spec:
+  selector:
+    matchLabels:
+      name: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        name: {{ .Values.name }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret }}
+
+      containers:
+        - name: surf
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .resources | nindent 12 }}
+          volumeMounts:
+            - name: storage
+              mountPath: /surf/storage
+          env:
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.databasePasswordSecret }}
+                  key: postgresql-password
+            - name: DATABASE_URL
+              value: "{{ printf "postgresql://%s:$(DATABASE_PASSWORD)@%s/%s" .Values.db.user .Values.db.host .Values.db.name }}"
+            - name: STORAGE_PATH
+              value: /surf/storage
+            - name: NODE_URL
+              value: {{ .Values.nodeURL }}
+
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.name }}-storage

@@ -1,0 +1,15 @@
+livenessProbe:
+  initialDelaySeconds: 200
+readinessProbe:
+  initialDelaySeconds: 200
+volumePermissions:
+  enabled: true
+postgresqlUsername: surf
+postgresqlDatabase: surf
+existingSecret: surf-db-password
+persistence:
+  storageClass: csi
+  enabled: true
+primary:
+  service:
+    type: ClusterIP
