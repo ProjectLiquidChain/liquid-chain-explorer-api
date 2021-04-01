@@ -27,7 +27,7 @@ func (service Service) GetTxsCount(r *http.Request, params *GetTxsCountParams, r
 	if err != nil {
 		return err
 	}
-	fmt.Println(params)
+
 	for i := 0; i < params.Size; i++ {
 		fromTime := toTime.Add(-duration)
 		fmt.Println(fromTime)
@@ -40,7 +40,7 @@ func (service Service) GetTxsCount(r *http.Request, params *GetTxsCountParams, r
 			return err
 		}
 		toTime = fromTime
-		counts[i] = int(count)
+		counts[params.Size-i-1] = int(count)
 	}
 
 	result.Counts = counts
